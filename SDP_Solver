@@ -1,0 +1,76 @@
+%% Solves a Primal Problem: NEEDS cvx
+% We consider FULL Distribution p=P(ab|xy), where x, y are measurement inputs and a,b are measurement outputs
+% Note: x=y=0 is the key generating measurement
+% Minimize over Pr(i),p^i
+% Objective Function: sum_i Pr(i)f(p^i)
+% Constraints: 1)sum_i Pr(i)*p^i = p 2)p^i are quantum realizable 3)Pr(i) is a probability distribution
+
+%Function inputs:
+%part: determines how precise one approximates f(p^i) via corresponding hyperplanes. Choose a natural number greater than or equal to 2. 
+%rounding: We typically take a value of 10^(-5) to ensure that we choose the correct hyperplanes to approximate f(p^i) even if there are small numerical inaccuracies
+%hierarchy: Sets the NPA hierarchy level
+%p_full: P(ab|xy)
+%A_input: # of inputs for Alice 
+%B_input: # of inputs for Bob 
+
+%Function outputs
+%cvx_optval: minimum for sum_i Pr(i)f(p^i)
+
+function [cvx_optval] = SDP_Solver(part,rounding,hierarchy,p_full, A_input, B_input) 
+    
+    
+    cvx_begin sdp
+    
+    
+        % We need to now the number of hyperplanes that are used to approximate f(p^i) -> row_numbers_cond
+        
+        expressions A_cond b_cond row_numbers_cond
+        [A_cond, b_cond] = conditions_lin_constraints(part,rounding)
+        row_numbers_cond = size(A_cond,1);
+        
+        
+        % All FULL unnormalized probability distributions: Pr(i)*p^i
+        variable all_p(2,2,A_input,B_input,row_numbers_cond)
+        
+        
+        % Parametrizations of hyperplanes: Hyperplanes in the form z = a*x + b*y + c
+        
+        expressions a_values b_values c_values
+        
+        [a_values,b_values,c_values] = get_param(part, rounding);
+        
+        % Creating Objective Function 
+        
+        Obj_function = 0;
+        for i_1 = 1 : row_numbers_cond
+            Obj_function = Obj_function + (all_p(1,1,1,1,i_1) + all_p(1,2,1,1,i_1) + all_p(2,1,1,1,i_1) + all_p(2,2,1,1,i_1))*c_values(i_1) + all_p(1,1,1,1,i_1)*a_values(i_1) + all_p(2,2,1,1,i_1)*b_values(i_1);
+        end
+        
+        % Used to set constraint 1 (and indirectly constraint 3)
+        
+        Prob_Sum = zeros(2,2,A_input,B_input);
+        for i_3 = 1 : row_numbers_cond
+            Prob_Sum = Prob_Sum + all_p(:,:,:,:,i_3);
+        end
+        
+        %Optimization
+        
+        minimize Obj_function
+        subject to 
+            
+        
+            % ALL unnormalized Pr(i)f(p^i) are quantum realizable
+            
+            for k = 1 : row_numbers_cond
+                p_k = all_p(:,:,:,:,k);
+                unnormNPA(p_k,hierarchy) == 1;
+            end
+            
+            % Probabilities sum up to measured Probability
+            
+            Prob_Sum == p_full;
+        
+    cvx_end
+    
+    
+end
