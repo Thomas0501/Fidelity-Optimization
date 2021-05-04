@@ -1,0 +1,62 @@
+%% Finds hyperplanes that are needed to approximate f(p^i): Needs vert2con (https://www.mathworks.com/matlabcentral/fileexchange/7895-vert2con-vertices-to-constraints)
+
+%Function inputs:
+%k: determines how precise one approximates f(p^i) via corresponding hyperplanes. Choose a natural number greater than or equal to 2. 
+%rounding: We typically take a value of 10^(-5) to ensure that we choose the correct hyperplanes to approximate f(p^i) even if there are small numerical inaccuracies
+
+%Function outputs
+%A: mx(2+1) matrix, where m is there number of hyperplanes used to approximate f(p^i)
+%b: is a vector of length m, where m is there number of hyperplanes used to approximate f(p^i)
+
+%Note that without loss of generality, the m hyperplanes can be thought of as two-dim. planes that satisfy A*x=b, where x are the coordinates in R^3 and each row represents a different plane.
+
+
+% Find linear constraints as a function of partition k:
+% Remove all unnecessary planes by requiring that z_normal> 0 (+rounding error)
+
+function [A,b] = conditions_lin_constraints(k,rounding)
+   
+    %Create array V: Will be filled later and is needed to store vertices
+    
+    V_array = zeros(2*k*k,3);
+    
+
+    %range of values for E_i: used to define the uniformly spaced grid, L_n from paper
+    
+    E_val = linspace(0,1,k);
+    
+    %Fill first k^2 points
+    
+    for i = 1 : k
+        for j = 1 : k
+            V_array((i-1)*k+j,1) = E_val(i); 
+            V_array((i-1)*k+j,2) = E_val(j);
+            V_array((i-1)*k+j,3) = sqrt(E_val(i)*E_val(j));
+        end
+    end
+    
+    %Fill second k^2 points
+    
+    for m = 1 : k
+        for n = 1 : k
+            V_array((m-1)*k+n + k*k,1) = E_val(m); 
+            V_array((m-1)*k+n + k*k,2) = E_val(n);
+            V_array((m-1)*k+n + k*k,3) = 0;
+        end
+    end
+    
+    %A is a mx(2+1) matrix, b is a m vector
+    
+    [A,b] = vert2con(V_array);
+    
+    row_numbers = size(A,1);
+        
+    %Remove unwanted planes
+    
+    for p = 1 : row_numbers
+        if A(row_numbers + 1 - p,25) <= rounding;
+            A(row_numbers + 1 - p,:) = [];
+            b(row_numbers + 1 - p) = [];
+        end
+    end
+end
