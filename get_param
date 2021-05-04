@@ -1,0 +1,30 @@
+%% Finds cooeficients of (hyper)planes that are needed to approximate f(p^i): Needs conditions_lin_constraints
+
+%Function inputs:
+%k: determines how precise one approximates f(p^i) via corresponding hyperplanes. Choose a natural number greater than or equal to 2. 
+%rounding: We typically take a value of 10^(-5) to ensure that we choose the correct hyperplanes to approximate f(p^i) even if there are small numerical inaccuracies
+
+%Function outputs: (hyper)plane coefficients
+%a: is a vector of length m, where m is there number of (hyper)planes used to approximate f(p^i)
+%b: is a vector of length m, where m is there number of (hyper)planes used to approximate f(p^i)
+%c: is a vector of length m, where m is there number of (hyper)planes used to approximate f(p^i)
+
+%Note that without loss of generality, the m (hyper)planes can be thought of as two-dim. planes in R^3
+
+
+%% Get linear coefficients a, b, c s.t z = a*x + b*y + c
+% a, b, c are vectors where each row represents one facet
+
+function [a,b,c] = get_param(k, rounding)
+    [A,B] = conditions_lin_constraints(k,rounding)
+    row_numbers = size(A,1);
+    a = zeros(row_numbers,1);
+    b = zeros(row_numbers,1);
+    c = zeros(row_numbers,1);
+    
+    for i = 1 : row_numbers
+        a(i) = -A(i,1)/A(i,3);
+        b(i) = -A(i,2)/A(i,3);
+        c(i) = B(i)/A(i,3);
+    end
+end
