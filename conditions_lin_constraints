@@ -12,7 +12,7 @@
 
 
 % Find linear constraints as a function of partition k:
-% Remove all unnecessary planes by requiring that z_normal> 0 (+rounding error)
+% Remove all unnecessary planes by requiring that the z component of the normal vector (that shows "outwards" of the polytope) is positive, i.e. z_normal> 0 (+rounding error)
 
 function [A,b] = conditions_lin_constraints(k,rounding)
    
