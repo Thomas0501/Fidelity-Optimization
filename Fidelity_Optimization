@@ -1,0 +1,18 @@
+%% Minimizes Fidelity: Needs SDP_Solver
+
+ %Function inputs:
+ %p_full: P(ab|xy)
+ %A_input: # of inputs for Alice 
+ %B_input: # of inputs for Bob 
+
+ %Function outputs
+ %fid: minimum fidelity for a given measured probability distribution, P(ab|xy)
+
+
+function [fid] = Fidelity_Optimization(p_full, A_input, B_input) 
+    part = 4;
+    rounding = 10^(-5);
+    hierarchy = 3;
+    P00 = p_full(1,1,1,1);
+    fid = SDP_Solver(part,rounding,hierarchy,p_full, A_input, B_input)/P00;
+end
