@@ -1,4 +1,4 @@
-%% Solves a Primal Problem: Needs conditions_lin_constraints, get_param, CVX (http://cvxr.com/cvx/), unnormNPA (http://www.qetlab.com/unnormNPA), opt_args.m (http://www.qetlab.com/opt_args)
+%% Solves a Primal Problem: Needs conditions_lin_constraints, get_param, CVX (http://cvxr.com/cvx/), unnormNPA, opt_args.m (http://www.qetlab.com/opt_args)
 % We consider FULL Distribution p=P(ab|xy), where x, y are measurement inputs and a,b are measurement outputs
 % Note: x=y=0 is the key generating measurement
 % Minimize over Pr(i),p^i
