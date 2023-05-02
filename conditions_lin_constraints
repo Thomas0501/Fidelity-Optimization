@@ -54,7 +54,7 @@ function [A,b] = conditions_lin_constraints(k,rounding)
     %Remove unwanted planes
     
     for p = 1 : row_numbers
-        if A(row_numbers + 1 - p,25) <= rounding;
+        if A(row_numbers + 1 - p,3) <= rounding;
             A(row_numbers + 1 - p,:) = [];
             b(row_numbers + 1 - p) = [];
         end
